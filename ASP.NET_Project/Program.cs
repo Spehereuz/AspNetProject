@@ -7,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AspNetProjectDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 // У нас будуть View - це такі сторінки, де можна писати на C# Index.cshtml
 // ASP.NET_Project - вихідний файл проекту
 // контролер - це клас на C#, який приймає запити від клієнта і виконує усю логіку роботи
@@ -35,6 +37,7 @@ app.MapControllerRoute(
     pattern: "{controller=Categories}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+await app.SeedData(); // Викликаємо метод, який буде заповнювати базу даних даними. Це асинхронний метод, тому чекаємо його завершення
 
 app.Run(); // Запускає наш хост (Сервер) і ми бачимо консоль
 
