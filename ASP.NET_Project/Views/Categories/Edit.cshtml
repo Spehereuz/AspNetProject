@@ -1,0 +1,66 @@
+﻿@model CategoryCreateViewModel
+
+<div class="container">
+    <form asp-action="Edit" class="p-4 shadow rounded bg-light" style="max-width: 600px; margin: auto;">
+        <h4 class="mb-4">Редагування категорії</h4>
+
+        <!-- Назва категорії -->
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" id="categoryNameInput" type="text" class="form-control" placeholder="Виберіть категорію" readonly data-bs-toggle="modal" data-bs-target="#categoryModal">
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <!-- Опис -->
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Оновіть опис категорії"></textarea>
+        </div>
+
+        <!-- Зображення (URL) -->
+        <div class="mb-3">
+            <label asp-for="ImageUrl" class="form-label"></label>
+            <input asp-for="ImageUrl" type="url" class="form-control" placeholder="https://example.com/updated-image.jpg">
+        </div>
+
+        <!-- Кнопки -->
+        <button type="submit" class="btn btn-warning">Зберегти зміни</button>
+        <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>
+
+<!-- Модальне вікно Bootstrap -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoryModalLabel">Оберіть категорію</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрити"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group">
+                    @foreach (var name in ViewBag.Categories as List<string>)
+                    {
+                        <li class="list-group-item list-group-item-action" onclick="selectCategory('@name')">@name</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function selectCategory(name) {
+            document.getElementById('categoryNameInput').value = name;
+
+            // Закриття модального вікна
+            var modalElement = document.getElementById('categoryModal');
+            var modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (!modalInstance) {
+                modalInstance = new bootstrap.Modal(modalElement);
+            }
+            modalInstance.hide();
+        }
+    </script>
+}
