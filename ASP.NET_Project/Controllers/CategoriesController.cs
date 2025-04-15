@@ -68,25 +68,17 @@ namespace ASP.NET_Project.Controllers
                 return View(model); // Повертаємо View з назвою Edit
             }
 
-            // Якщо значення Description та ImageUrl однакові — не оновлюємо.
-            bool isUpdated = false;
-
-            if (category.Description != model.Description)
+            if (model.Description != null)
             {
                 category.Description = model.Description; // Оновлюємо опис категорії
-                isUpdated = true;
             }
-
-            if (category.ImageUrl != model.ImageUrl)
+            
+            if (model.ImageUrl != null)
             {
                 category.ImageUrl = model.ImageUrl; // Оновлюємо URL зображення категорії
-                isUpdated = true;
             }
 
-            if (isUpdated)
-            {
-                await context.SaveChangesAsync(); // Зберігаємо зміни в базі даних
-            }
+            await context.SaveChangesAsync(); // Зберігаємо зміни в базі даних
             return RedirectToAction(nameof(Index)); // Після збереження — перенаправляємо на список категорій
         }
 
@@ -105,7 +97,8 @@ namespace ASP.NET_Project.Controllers
             if (string.IsNullOrEmpty(name))
             {
                 ModelState.AddModelError("Name", "Назва категорії не вказана!");
-                return RedirectToAction(nameof(Index));
+                ViewBag.Categories = await context.Categories.Select(c => c.Name).ToListAsync();
+                return View(name);
             }
 
             // Шукаємо категорію за назвою
@@ -114,7 +107,8 @@ namespace ASP.NET_Project.Controllers
             if (category == null)
             {
                 ModelState.AddModelError("Name", "Категорія з такою назвою не знайдена.");
-                return RedirectToAction(nameof(Index));
+                ViewBag.Categories = await context.Categories.Select(c => c.Name).ToListAsync();
+                return View(name);
             }
 
             // Видалення з бази даних
