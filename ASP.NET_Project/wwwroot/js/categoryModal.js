@@ -4,7 +4,7 @@
 }
 
 function selectCategory(name) {
-    document.getElementById('categoryNameInput').value = name;
+    document.getElementById('Name').value = name;
     const modal = bootstrap.Modal.getInstance(document.getElementById('categoryModal'));
     modal.hide();
 }
