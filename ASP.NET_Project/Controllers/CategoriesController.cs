@@ -2,6 +2,8 @@
 using ASP.NET_Project.Models.Category;
 using ASP.NET_Project.Data;
 using AutoMapper;
+using ASP.NET_Project.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace ASP.NET_Project.Controllers
 {
@@ -9,8 +11,32 @@ namespace ASP.NET_Project.Controllers
     {
         public IActionResult Index() // Будь-який web результат - View, Файл, Json, Redirect, PDF, тощо
         {
+            // Отримуємо список категорій з бази даних і перетворюємо його в список CategoryItemViewModel
             var model = mapper.ProjectTo<CategoryItemViewModel>(context.Categories).ToList();
+            
             return View(model); // Повертаємо View з назвою Index
+        }
+
+        [HttpGet] // Атрибут, який вказує, що метод відповідає на GET запит
+        public IActionResult Create() // Метод, який відповідає за створення нової категорії
+        {
+            return View(); // Повертаємо View з назвою Create
+        }
+        
+        [HttpPost] // Атрибут, який вказує, що метод відповідає на Post запит
+        public async Task<IActionResult> Create(CategoryCreateViewModel model) // Метод, який відповідає за створення нової категорії
+        {
+            var item = await context.Categories.SingleOrDefaultAsync(x => x.Name == model.Name); // Перевіряємо, чи існує категорія з такою назвою
+            if (item != null) // Якщо категорія існує
+            {
+                ModelState.AddModelError("Name", "Категорія з такою назвою вже існує"); // Додаємо помилку в модель
+                return View(model); // Повертаємо View з назвою Create
+            }
+            
+            item = mapper.Map<CategoryEntity>(model); // Перетворюємо модель в CategoryEntity
+            await context.Categories.AddAsync(item); // Додаємо нову категорію в базу даних
+            await context.SaveChangesAsync(); // Зберігаємо зміни в базі даних
+            return RedirectToAction(nameof(Index)); // Якщо все добре, то перенаправляємо на метод Index
         }
     }
 }
