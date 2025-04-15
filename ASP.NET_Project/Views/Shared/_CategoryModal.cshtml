@@ -1,0 +1,22 @@
+﻿@model List<string>
+
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoryModalLabel">Оберіть категорію</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрити"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group">
+                    @foreach (var name in Model)
+                    {
+                        <li class="list-group-item list-group-item-action" onclick="selectCategory('@name')">
+                            @name
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
