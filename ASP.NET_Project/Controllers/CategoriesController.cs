@@ -4,10 +4,15 @@ using ASP.NET_Project.Data;
 using AutoMapper;
 using ASP.NET_Project.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Webp;
+using ASP.NET_Project.Interfaces;
 
 namespace ASP.NET_Project.Controllers
 {
-    public class CategoriesController(AspNetProjectDbContext context, IMapper mapper) : Controller
+    public class CategoriesController(AspNetProjectDbContext context, 
+        IMapper mapper, IImageService imageService) : Controller
     {
         public IActionResult Index() // Будь-який web результат - View, Файл, Json, Redirect, PDF, тощо
         {
@@ -27,15 +32,16 @@ namespace ASP.NET_Project.Controllers
         public async Task<IActionResult> Create(CategoryCreateViewModel model) // Метод, який відповідає за створення нової категорії
         {
             // Перевіряємо, чи існує категорія з такою назвою
-            var item = await context.Categories.SingleOrDefaultAsync(x => x.Name == model.Name);
-            if (item != null) // Якщо категорія існує
+            var entity = await context.Categories.SingleOrDefaultAsync(x => x.Name == model.Name);
+            if (entity != null) // Якщо категорія існує
             {
                 ModelState.AddModelError("Name", "Категорія з такою назвою вже існує"); // Додаємо помилку в модель
                 return View(model); // Повертаємо View з назвою Create
             }
-            
-            item = mapper.Map<CategoryEntity>(model); // Перетворюємо модель в CategoryEntity
-            await context.Categories.AddAsync(item); // Додаємо нову категорію в базу даних
+
+            entity = mapper.Map<CategoryEntity>(model); // Перетворюємо модель в CategoryEntity
+            entity.ImageUrl = await imageService.SaveImageAsync(model.ImageFile); // Присвоюємо URL зображення категорії
+            await context.Categories.AddAsync(entity); // Додаємо нову категорію в базу даних
             await context.SaveChangesAsync(); // Зберігаємо зміни в базі даних
             return RedirectToAction(nameof(Index)); // Якщо все добре, то перенаправляємо на метод Index
         }
@@ -43,11 +49,7 @@ namespace ASP.NET_Project.Controllers
         [HttpGet] // Атрибут, який вказує, що метод відповідає на GET запит
         public IActionResult Edit()
         {
-            // Отримуємо список категорій з бази даних
-            var categories = context.Categories
-                .Select(c => c.Name)
-                .ToList();
-
+            var categories = context.Categories.Select(c => c.Name).ToList(); // Отримуємо список категорій з бази даних
             ViewBag.Categories = categories; // Передаємо список категорій в ViewBag
             return View(); // Повертаємо View з назвою Edit
         }

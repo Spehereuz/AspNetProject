@@ -1,5 +1,8 @@
 using ASP.NET_Project.Data;
+using ASP.NET_Project.Interfaces;
+using ASP.NET_Project.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,7 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AspNetProjectDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); // Додаємо AutoMapper для перетворення моделей. Це потрібно для того, щоб перетворювати моделі з одного формату в інший. Наприклад, з CategoryEntity в CategoryItemViewModel
+
+builder.Services.AddScoped<IImageService, ImageService>(); // Додаємо сервіс для роботи з зображеннями. Це потрібно для того, щоб зберігати зображення в базі даних
 
 // У нас будуть View - це такі сторінки, де можна писати на C# Index.cshtml
 // ASP.NET_Project - вихідний файл проекту
@@ -36,6 +41,17 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Categories}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+var dir = builder.Configuration["ImagesDir"]; // Отримуємо директорію, в якій будуть зберігатися зображення. Це потрібно для того, щоб зберігати туди зображення, які ми будемо завантажувати на сайт
+string path = Path.Combine(Directory.GetCurrentDirectory(), dir); // Отримуємо поточну директорію, в якій запущено додаток, і з'єднуємо її з директорією, в якій будуть зберігатися зображення.
+Directory.CreateDirectory(path); // Створюємо директорію, якщо її немає. Це потрібно для того, щоб зберігати туди зображення, які ми будемо завантажувати на сайт
+
+// Налаштування для статичних файлів
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(path), // Вказуємо, що ми будемо використовувати фізичну директорію, в якій будуть зберігатися зображення
+    RequestPath = $"/{dir}" // Вказуємо, що ми будемо використовувати директорію, в якій будуть зберігатися зображення
+});
 
 await app.SeedData(); // Викликаємо метод, який буде заповнювати базу даних даними. Це асинхронний метод, тому чекаємо його завершення
 

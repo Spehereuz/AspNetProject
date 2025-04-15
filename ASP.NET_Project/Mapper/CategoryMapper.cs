@@ -13,7 +13,8 @@ namespace ASP.NET_Project.Mapper
                 .ForMember(x => x.Image, opt => opt.MapFrom(x => x.ImageUrl));
 
             // Мапінг з CategoryItemViewModel до CategoryEntity
-            CreateMap<CategoryCreateViewModel, CategoryEntity>();
+            CreateMap<CategoryCreateViewModel, CategoryEntity>()
+                .ForMember(x => x.ImageUrl, opt => opt.Ignore());
 
             // Мапінг з CategoryEditViewModel до CategoryEntity
             CreateMap<CategoryEditViewModel, CategoryEntity>();
