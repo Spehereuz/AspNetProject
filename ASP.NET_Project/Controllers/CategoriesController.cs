@@ -26,7 +26,8 @@ namespace ASP.NET_Project.Controllers
         [HttpPost] // Атрибут, який вказує, що метод відповідає на Post запит
         public async Task<IActionResult> Create(CategoryCreateViewModel model) // Метод, який відповідає за створення нової категорії
         {
-            var item = await context.Categories.SingleOrDefaultAsync(x => x.Name == model.Name); // Перевіряємо, чи існує категорія з такою назвою
+            // Перевіряємо, чи існує категорія з такою назвою
+            var item = await context.Categories.SingleOrDefaultAsync(x => x.Name == model.Name);
             if (item != null) // Якщо категорія існує
             {
                 ModelState.AddModelError("Name", "Категорія з такою назвою вже існує"); // Додаємо помилку в модель
@@ -60,7 +61,8 @@ namespace ASP.NET_Project.Controllers
             if (category == null)
             {
                 ModelState.AddModelError("Name", "Категорія з такою назвою не знайдена.");
-                ViewBag.Categories = await context.Categories.Select(c => c.Name).ToListAsync(); // Повторно передаємо список категорій для View у випадку помилки
+                // Повторно передаємо список категорій для View у випадку помилки
+                ViewBag.Categories = await context.Categories.Select(c => c.Name).ToListAsync();
                 return View(model); // Повертаємо View з назвою Edit
             }
 
@@ -92,6 +94,33 @@ namespace ASP.NET_Project.Controllers
             var categories = context.Categories.Select(c => c.Name).ToList(); // Отримуємо список категорій з бази даних
             ViewBag.Categories = categories; // Передаємо список категорій в ViewBag
             return View(); // Повертаємо View з назвою Delete
+        }
+
+        [HttpPost] // Атрибут, який вказує, що метод відповідає на Post запит
+        public async Task<IActionResult> Delete(string name)
+        {
+            // Перевірка чи передана назва не порожня
+            if (string.IsNullOrEmpty(name))
+            {
+                ModelState.AddModelError("Name", "Назва категорії не вказана!");
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Шукаємо категорію за назвою
+            var category = await context.Categories.FirstOrDefaultAsync(c => c.Name == name);
+
+            if (category == null)
+            {
+                ModelState.AddModelError("Name", "Категорія з такою назвою не знайдена.");
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Видалення з бази даних
+            context.Categories.Remove(category);
+            await context.SaveChangesAsync();
+
+            TempData["Success"] = $"Категорія '{name}' успішно видалена!";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

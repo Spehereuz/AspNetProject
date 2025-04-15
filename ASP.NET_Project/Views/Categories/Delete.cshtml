@@ -1,0 +1,24 @@
+﻿@model CategoryEditViewModel
+
+<div class="container">
+    <form asp-action="Delete" method="post" class="p-4 shadow rounded bg-light" style="max-width: 600px; margin: auto;">
+        <h4 class="mb-4 text-danger">Видалення категорії</h4>
+
+        <!-- Вибір категорії -->
+        <div class="mb-3">
+            <label for="categoryNameInput" class="form-label">Оберіть категорію для видалення</label>
+            <input id="categoryNameInput" name="Name" type="text" class="form-control" placeholder="Натисніть для вибору" readonly onclick="openModal()" required>
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <!-- Кнопки -->
+        <button type="submit" class="btn btn-danger">Видалити</button>
+        <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>
+
+@await Html.PartialAsync("_CategoryModal", ViewBag.Categories as List<string>)
+
+@section Scripts {
+    <script src="/js/categoryModal.js"></script>
+}
