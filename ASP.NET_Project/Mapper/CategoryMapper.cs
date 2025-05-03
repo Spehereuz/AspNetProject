@@ -8,16 +8,17 @@ namespace ASP.NET_Project.Mapper
     {
         public CategoryMapper()
         {
-            // Мапінг з CategoryEntity до CategoryItemViewModel
             CreateMap<CategoryEntity, CategoryItemViewModel>()
-                .ForMember(x => x.Image, opt => opt.MapFrom(x => x.ImageUrl));
+            .ForMember(x => x.Image, opt => opt.MapFrom(x => x.ImageUrl));
 
-            // Мапінг з CategoryItemViewModel до CategoryEntity
             CreateMap<CategoryCreateViewModel, CategoryEntity>()
                 .ForMember(x => x.ImageUrl, opt => opt.Ignore());
 
-            // Мапінг з CategoryEditViewModel до CategoryEntity
-            CreateMap<CategoryEditViewModel, CategoryEntity>();
+            CreateMap<CategoryEntity, CategoryEditViewModel>()
+                .ForMember(x => x.ViewImage, opt => opt.MapFrom(x =>
+                    string.IsNullOrEmpty(x.ImageUrl) ? "/pictures/default.jpg" : $"/images/400_{x.ImageUrl}"))
+                .ForMember(x => x.ImageFile, opt => opt.Ignore())
+                .ReverseMap();
         }
     }
 }

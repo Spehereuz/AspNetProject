@@ -14,12 +14,11 @@ namespace ASP.NET_Project.Controllers
     public class CategoriesController(AspNetProjectDbContext context, 
         IMapper mapper, IImageService imageService) : Controller
     {
-        public IActionResult Index() // Будь-який web результат - View, Файл, Json, Redirect, PDF, тощо
+        public IActionResult Index() //Це будь-який web результат - View - сторінка, Файл, PDF, Excel
         {
-            // Отримуємо список категорій з бази даних і перетворюємо його в список CategoryItemViewModel
+            ViewBag.Title = "Категорії";
             var model = mapper.ProjectTo<CategoryItemViewModel>(context.Categories).ToList();
-            
-            return View(model); // Повертаємо View з назвою Index
+            return View(model);
         }
 
         [HttpGet] // Атрибут, який вказує, що метод відповідає на GET запит
@@ -46,48 +45,55 @@ namespace ASP.NET_Project.Controllers
             return RedirectToAction(nameof(Index)); // Якщо все добре, то перенаправляємо на метод Index
         }
 
-        [HttpGet] // Атрибут, який вказує, що метод відповідає на GET запит
-        public IActionResult Edit()
+        [HttpGet] //Тепер він працює методом GET - це щоб побачити форму
+        public async Task<IActionResult> Edit(int id)
         {
-            var categories = context.Categories.Select(c => c.Name).ToList(); // Отримуємо список категорій з бази даних
-            ViewBag.Categories = categories; // Передаємо список категорій в ViewBag
-            return View(); // Повертаємо View з назвою Edit
-        }
-
-        [HttpPost] // Атрибут, який вказує, що метод відповідає на Post запит
-        public async Task<IActionResult> Edit(CategoryEditViewModel model)
-        {
-            // Перевіряємо чи така категорія існує в базі
-            var category = await context.Categories.SingleOrDefaultAsync(c => c.Name == model.Name);
-
+            var category = await context.Categories.FindAsync(id);
             if (category == null)
             {
-                ModelState.AddModelError("Name", "Категорія з такою назвою не знайдена.");
-                // Повторно передаємо список категорій для View у випадку помилки
-                ViewBag.Categories = await context.Categories.Select(c => c.Name).ToListAsync();
-                return View(model); // Повертаємо View з назвою Edit
+                return NotFound();
             }
+            //Динамічна колекція, яка збергає динамічні дані, які можна вкиористати на View
+            ViewBag.ImageName = category.ImageUrl;
 
-            if (model.Description != null)
-            {
-                category.Description = model.Description; // Оновлюємо опис категорії
-            }
-            
-            if (model.ImageUrl != null)
-            {
-                category.ImageUrl = model.ImageUrl; // Оновлюємо URL зображення категорії
-            }
+            //TempData["ImageUrl"] = category.ImageUrl;
 
-            await context.SaveChangesAsync(); // Зберігаємо зміни в базі даних
-            return RedirectToAction(nameof(Index)); // Після збереження — перенаправляємо на список категорій
+            var model = mapper.Map<CategoryEditViewModel>(category);
+            return View(model);
         }
 
-        [HttpGet] // Атрибут, який вказує, що метод відповідає на GET запит
-        public IActionResult Delete()
+        [HttpPost] //Тепер він працює методом GET - це щоб побачити форму
+        public async Task<IActionResult> Edit(CategoryEditViewModel model)
         {
-            var categories = context.Categories.Select(c => c.Name).ToList(); // Отримуємо список категорій з бази даних
-            ViewBag.Categories = categories; // Передаємо список категорій в ViewBag
-            return View(); // Повертаємо View з назвою Delete
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var existing = await context.Categories.FirstOrDefaultAsync(x => x.Id == model.Id);
+            if (existing == null)
+            {
+                return NotFound();
+            }
+
+            var duplicate = await context.Categories
+                .FirstOrDefaultAsync(x => x.Name == model.Name && x.Id != model.Id);
+            if (duplicate != null)
+            {
+                ModelState.AddModelError("Name", "Another category with this name already exists");
+                return View(model);
+            }
+
+            existing = mapper.Map(model, existing);
+
+            if (model.ImageFile != null)
+            {
+                await imageService.DeleteImageAsync(existing.ImageUrl);
+                existing.ImageUrl = await imageService.SaveImageAsync(model.ImageFile);
+            }
+            await context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost] // Атрибут, який вказує, що метод відповідає на Post запит

@@ -16,6 +16,12 @@
                         <p class="card-text">@item.Description</p>
                     </div>
 
+                    <div class="position-absolute top-0 end-2 pt-3 ps-3 delete-btn">
+                        <a asp-action="Edit" asp-route-id="@item.Id" asp class="btn btn-success">
+                            <i class="fas fa-pencil"></i>
+                        </a>
+                    </div>
+
                     <div class="position-absolute top-0 end-0 p-3 delete-btn">
                         <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#@modalId">
                             <i class="fas fa-trash-alt"></i>
