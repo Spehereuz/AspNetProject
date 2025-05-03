@@ -7,6 +7,29 @@ namespace ASP.NET_Project.Services
 {
     public class ImageService(IConfiguration configuration) : IImageService
     {
+        public async Task DeleteImageAsync(string name)
+        {
+            var sizes = configuration.GetRequiredSection("ImageSizes").Get<List<int>>();
+            var dir = Path.Combine(Directory.GetCurrentDirectory(), configuration["ImagesDir"]!);
+
+            Task[] tasks = sizes
+                .AsParallel()
+                .Select(size =>
+                {
+                    return Task.Run(() =>
+                    {
+                        var path = Path.Combine(dir, $"{size}_{name}");
+                        if (File.Exists(path))
+                        {
+                            File.Delete(path);
+                        }
+                    });
+                })
+                .ToArray();
+
+            await Task.WhenAll(tasks);
+        }
+
         public async Task<string> SaveImageAsync(IFormFile file)
         {
             using MemoryStream ms = new(); // Створюємо новий потік пам'яті

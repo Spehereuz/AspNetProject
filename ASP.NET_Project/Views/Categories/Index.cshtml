@@ -1,30 +1,50 @@
-﻿@model List<ASP.NET_Project.Models.Category.CategoryItemViewModel>
+﻿@model List<CategoryItemViewModel>
 
 <div class="container mt-5">
     <h2 class="text-center mb-4">Категорії мультфільмів</h2>
+    <a href="@Url.Action("Create")" class="btn btn-success">Додати</a>
     <div class="row row-cols-1 row-cols-md-3 g-4">
         @foreach (var item in Model)
         {
+            var modalId = $"confirmDeleteModal_{item.Id}";
+
             <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <img src="/images/200_@item.Image" class="card-img-top" alt="@item.Name" style="height: 200px; object-fit: cover;">
+                <div class="card h-100 shadow-sm position-relative">
+                    <img src="/images/400_@item.Image" class="card-img-top" alt="@item.Name" style="height: 200px; object-fit: cover;">
                     <div class="card-body">
                         <h5 class="card-title">@item.Name</h5>
                         <p class="card-text">@item.Description</p>
                     </div>
+
+                    <div class="position-absolute top-0 end-0 p-3 delete-btn">
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#@modalId">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="modal fade" id="@modalId" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="label_@item.Id">Підтвердження видалення</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Ви дійсно хочете видалити категорію <strong>@item.Name</strong>?
+                        </div>
+                        <div class="modal-footer">
+                            <form asp-action="Delete">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                                <button type="submit" class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Видалити</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         }
-    </div>
-    <div class="d-flex justify-content-center gap-3 mt-4">
-        <a href="@Url.Action("Create")" class="btn btn-outline-primary rounded-pill px-4 py-2">
-            Додати категорію
-        </a>
-        <a href="@Url.Action("Edit")" class="btn btn-outline-secondary rounded-pill px-4 py-2">
-            Редагувати категорії
-        </a>
-        <a href="@Url.Action("Delete")" class="btn btn-outline-danger rounded-pill px-4 py-2">
-            Видалити категорію
-        </a>
     </div>
 </div>

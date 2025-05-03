@@ -91,31 +91,22 @@ namespace ASP.NET_Project.Controllers
         }
 
         [HttpPost] // Атрибут, який вказує, що метод відповідає на Post запит
-        public async Task<IActionResult> Delete(string name)
+        public async Task<IActionResult> Delete(int id)
         {
-            // Перевірка чи передана назва не порожня
-            if (string.IsNullOrEmpty(name))
-            {
-                ModelState.AddModelError("Name", "Назва категорії не вказана!");
-                ViewBag.Categories = await context.Categories.Select(c => c.Name).ToListAsync();
-                return View(name);
-            }
-
-            // Шукаємо категорію за назвою
-            var category = await context.Categories.FirstOrDefaultAsync(c => c.Name == name);
-
+            var category = await context.Categories.SingleOrDefaultAsync(x => x.Id == id);
             if (category == null)
             {
-                ModelState.AddModelError("Name", "Категорія з такою назвою не знайдена.");
-                ViewBag.Categories = await context.Categories.Select(c => c.Name).ToListAsync();
-                return View(name);
+                return NotFound();
             }
 
-            // Видалення з бази даних
+            if (!string.IsNullOrEmpty(category.ImageUrl))
+            {
+                await imageService.DeleteImageAsync(category.ImageUrl);
+            }
+
             context.Categories.Remove(category);
             await context.SaveChangesAsync();
 
-            TempData["Success"] = $"Категорія '{name}' успішно видалена!";
             return RedirectToAction(nameof(Index));
         }
     }
