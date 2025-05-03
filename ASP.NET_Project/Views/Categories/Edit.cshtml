@@ -4,53 +4,46 @@
     ViewData["Title"] = "Редагувати";
 }
 
-<h1>Редагувати категорію</h1>
+<div class="container">
+    <form asp-action="Edit" enctype="multipart/form-data" class="p-4 shadow rounded bg-light" style="max-width: 600px; margin: auto;">
+        <h4 class="mb-4">Редагування категорії</h4>
 
+        <!-- Загальні помилки -->
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-<hr />
-<div class="row">
-    <div class="offset-md-3 col-md-6">
-        <form asp-action="Edit" enctype="multipart/form-data">
-            @* У цьому блоці виводяться не стандартні помилки *@
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <!-- Для збереження зображення, якщо нове не завантажене -->
+        <input asp-for="ViewImage" type="hidden" />
 
-            <input asp-for="ViewImage" type="hidden" />
+        <!-- Назва категорії -->
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" type="text" class="form-control" placeholder="Введіть назву категорії" required />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
 
+        <!-- Опис -->
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Введіть опис категорії"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
 
-            <div class="mb-3">
-                <label asp-for="Name" class="form-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+        <!-- Зображення -->
+        <div class="mb-3 text-center">
+            <img src="@Model.ViewImage" width="200" id="imagePreview" class="img-thumbnail mb-2" />
+            <div>
+                <label asp-for="ImageFile" class="form-label"></label>
+                <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
             </div>
+        </div>
 
-            <div class="mb-3">
-                <label asp-for="Description" class="form-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-
-            <div class="row">
-                <div class="col-md-3">
-                    <img src="@Model.ViewImage" width="100%" id="imagePreview" />
-                </div>
-                <div class="col-md-9">
-                    <div class="mb-3">
-                        <label asp-for="ImageFile" class="form-label"></label>
-                        <input asp-for="ImageFile" type="file" class="form-control" accept="image/*">
-                        <span asp-validation-for="ImageFile" class="text-danger"></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Зберегти" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
-
-<div>
-    <a asp-action="Index">Повернути назад</a>
+        <!-- Кнопки -->
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary">Зберегти</button>
+            <a asp-action="Index" class="btn btn-info">Скасувати</a>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
@@ -59,9 +52,10 @@
     }
     <script>
         document.getElementById("ImageFile").addEventListener("change", (e) => {
-            const file = e.target.files[0]; // Перший вибраний файл
-            if(file)
-                document.getElementById("imagePreview").src=URL.createObjectURL(file);
-        })
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById("imagePreview").src = URL.createObjectURL(file);
+            }
+        });
     </script>
 }
