@@ -1,6 +1,8 @@
 using ASP.NET_Project.Data;
+using ASP.NET_Project.Data.Entities.Identity;
 using ASP.NET_Project.Interfaces;
 using ASP.NET_Project.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
@@ -9,6 +11,19 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<AspNetProjectDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Додаємо налаштування для UserManager, RoleManager, SignInManager - займається cookies
+builder.Services.AddIdentity<UserEntity, RoleEntity>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequiredLength = 6;
+    options.Password.RequiredUniqueChars = 1;
+})
+    .AddEntityFrameworkStores<AspNetProjectDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); // Додаємо AutoMapper для перетворення моделей. Це потрібно для того, щоб перетворювати моделі з одного формату в інший. Наприклад, з CategoryEntity в CategoryItemViewModel
 
