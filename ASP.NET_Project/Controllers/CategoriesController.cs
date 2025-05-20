@@ -8,6 +8,8 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Webp;
 using ASP.NET_Project.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using ASP.NET_Project.Constants;
 
 namespace ASP.NET_Project.Controllers
 {
@@ -97,6 +99,7 @@ namespace ASP.NET_Project.Controllers
         }
 
         [HttpPost] // Атрибут, який вказує, що метод відповідає на Post запит
+        [Authorize(Roles = $"{Roles.Admin}")]
         public async Task<IActionResult> Delete(int id)
         {
             var category = await context.Categories.SingleOrDefaultAsync(x => x.Id == id);
